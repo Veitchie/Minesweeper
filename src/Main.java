@@ -23,23 +23,26 @@ public class Main {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
-    public static void printBoard(Cell[][] board, int boardSizeX, int boardSizeY){
-        for (int i = 0; i < boardSizeY; i++) {
-            System.out.print((boardSizeY - 1 - i) + "\t|");
-            for (int j = 0; j < boardSizeX; j++) {
+    public static void main(String args[]) {
+        run();
+    }
+    public static void printBoard(Cell[][] board, int sizeX, int sizeY){
+        for (int i = 0; i < sizeY; i++) {
+            System.out.print((sizeY - 1 - i) + "\t|");
+            for (int j = 0; j < sizeX; j++) {
                 System.out.print(" " + board[i][j].getValue() + " ");
             }
             System.out.println();
         }
 
         System.out.print("\t-");
-        for (int i = 0; i < boardSizeX; i++) {
+        for (int i = 0; i < sizeX; i++) {
             System.out.print("---");
         }
         System.out.println();
 
         System.out.print("\t ");
-        for (int i = 0; i < boardSizeX; i++) {
+        for (int i = 0; i < sizeX; i++) {
             if (i > 9){
                 System.out.print(" " + i);
             }else {
@@ -49,23 +52,23 @@ public class Main {
         System.out.println();
     }
 
-    public static void printBlankBoard(int boardSizeX, int boardSizeY){
-        for (int i = 0; i < boardSizeY; i++) {
-            System.out.print((boardSizeY - 1 - i) + "\t|");
-            for (int j = 0; j < boardSizeX; j++) {
+    public static void printBlankBoard(int sizeX, int sizeY){
+        for (int i = 0; i < sizeY; i++) {
+            System.out.print((sizeY - 1 - i) + "\t|");
+            for (int j = 0; j < sizeX; j++) {
                 System.out.print(" ? ");
             }
             System.out.println();
         }
 
         System.out.print("\t-");
-        for (int i = 0; i < boardSizeX; i++) {
+        for (int i = 0; i < sizeX; i++) {
             System.out.print("---");
         }
         System.out.println();
 
         System.out.print("\t ");
-        for (int i = 0; i < boardSizeX; i++) {
+        for (int i = 0; i < sizeX; i++) {
             if (i > 9){
                 System.out.print(" " + i);
             }else {
@@ -102,7 +105,7 @@ public class Main {
 
     }
 
-    public static Cell[][] revealArea(Cell[][] board, int boardSizeX, int boardSizeY, int[] userInputs){
+    public static Cell[][] revealArea(Cell[][] board, int sizeX, int sizeY, int[] userInputs){
         int[] temp = {userInputs[0], userInputs[1]};
         boolean areaCleared = false;
 
@@ -110,12 +113,12 @@ public class Main {
         int x = userInputs[0];
         int y = userInputs[1];
 
-        if (x < boardSizeX - 1){
+        if (x < sizeX - 1){
             if (board[y][x + 1].getRawValue() == 0 && board[y][x + 1].getHidden()){
                 board[y][x + 1].setHidden();
                 temp[0] = x + 1;
                 temp[1] = y;
-                board = revealArea(board, boardSizeX, boardSizeY, temp);
+                board = revealArea(board, sizeX, sizeY, temp);
             }else if (!board[y][x + 1].getBomb() && board[y][x + 1].getHidden()){
                 board[y][x + 1].setHidden();
             }
@@ -126,18 +129,18 @@ public class Main {
                 board[y][x - 1].setHidden();
                 temp[0] = x - 1;
                 temp[1] = y;
-                board = revealArea(board, boardSizeX, boardSizeY, temp);
+                board = revealArea(board, sizeX, sizeY, temp);
             }else if (!board[y][x - 1].getBomb() && board[y][x - 1].getHidden()){
                 board[y][x - 1].setHidden();
             }
         }
 
-        if (y < boardSizeY - 1){
+        if (y < sizeY - 1){
             if (board[y + 1][x].getRawValue() == 0 && board[y + 1][x].getHidden()){
                 board[y + 1][x].setHidden();
                 temp[0] = x;
                 temp[1] = y + 1;
-                board = revealArea(board, boardSizeX, boardSizeY, temp);
+                board = revealArea(board, sizeX, sizeY, temp);
             }else if (!board[y + 1][x].getBomb() && board[y + 1][x].getHidden()){
                 board[y + 1][x].setHidden();
             }
@@ -148,7 +151,7 @@ public class Main {
                 board[y - 1][x].setHidden();
                 temp[0] = x;
                 temp[1] = y - 1;
-                board = revealArea(board, boardSizeX, boardSizeY, temp);
+                board = revealArea(board, sizeX, sizeY, temp);
             }else if (!board[y - 1][x].getBomb() && board[y - 1][x].getHidden()){
                 board[y - 1][x].setHidden();
             }
@@ -157,34 +160,33 @@ public class Main {
         return board;
     }
 
-    public static void main(String args[])
-    {
+    public static void run(){
 
         boolean gameFinished = false;
         int[] userInputs = new int[2];
-        int boardSizeX = 30;
-        int boardSizeY = 16;
+        int sizeX = 30;
+        int sizeY = 16;
         int numBombs = 60;
-        Cell[][] board = new Cell[boardSizeY][boardSizeX];
+        Cell[][] board = new Cell[sizeY][sizeX];
         Random rand = new Random();
 
         //Fill array
-        for (int i = 0; i < boardSizeY; i++){
-            for (int j = 0; j < boardSizeX; j++){
+        for (int i = 0; i < sizeY; i++){
+            for (int j = 0; j < sizeX; j++){
                 board[i][j] = new Cell();
             }
         }
 
-        printBlankBoard(boardSizeX, boardSizeY);
+        printBlankBoard(sizeX, sizeY);
 
         //Make initial choice
-        userInputs = getCoordinates(boardSizeX, boardSizeY);
+        userInputs = getCoordinates(sizeX, sizeY);
         board[userInputs[1]][userInputs[0]].setHidden();
 
         //Create bombs
         for (int i = 0; i < numBombs; i++){
-            int x = rand.nextInt(boardSizeX - 1);
-            int y = rand.nextInt(boardSizeY - 1);
+            int x = rand.nextInt(sizeX - 1);
+            int y = rand.nextInt(sizeY - 1);
 
             if ( (x < userInputs[0] - 1 || x > userInputs[0] + 1) && (y < userInputs[1] - 1 || y > userInputs[1] + 1) ){
                 if (!board[y][x].getBomb()) {
@@ -199,20 +201,20 @@ public class Main {
 
         //Calculate values for remaining cells
         int count = 0;
-        for (int i = 0; i < boardSizeY; i++) {
-            for (int j = 0; j < boardSizeX; j++) {
+        for (int i = 0; i < sizeY; i++) {
+            for (int j = 0; j < sizeX; j++) {
 
                 for (int k = -1; k < 2; k++){
                     int y = i + k;
 
                     if (y < 0){continue;}
-                    if (y >= boardSizeY){continue;}
+                    if (y >= sizeY){continue;}
 
                     for (int l = -1; l < 2; l++){
                         int x = j + l;
 
                         if (x < 0){continue;}
-                        if (x >= boardSizeX){continue;}
+                        if (x >= sizeX){continue;}
 
                         if (board[y][x].getBomb()){
                             count++;
@@ -227,18 +229,18 @@ public class Main {
         }
 
         //Reveal initial area
-        revealArea(board, boardSizeX, boardSizeY, userInputs);
+        revealArea(board, sizeX, sizeY, userInputs);
 
 
         while (!gameFinished) {
             //Print board
-            printBoard(board, boardSizeX, boardSizeY);
+            printBoard(board, sizeX, sizeY);
 
             //Get user input
-            userInputs = getCoordinates(boardSizeX, boardSizeY);
+            userInputs = getCoordinates(sizeX, sizeY);
             if (!board[userInputs[1]][userInputs[0]].getBomb()){
                 board[userInputs[1]][userInputs[0]].setHidden();
-                revealArea(board, boardSizeX, boardSizeY, userInputs);
+                revealArea(board, sizeX, sizeY, userInputs);
             }else{
                 printDeath();
                 gameFinished = true;
