@@ -240,7 +240,9 @@ public class Main {
             userInputs = getCoordinates(sizeX, sizeY);
             if (!board[userInputs[1]][userInputs[0]].getBomb()){
                 board[userInputs[1]][userInputs[0]].setHidden();
-                revealArea(board, sizeX, sizeY, userInputs);
+                if ( board[userInputs[1]][userInputs[0]].getRawValue() == 0 ){
+                    revealArea(board, sizeX, sizeY, userInputs);
+                }
             }else{
                 printDeath();
                 gameFinished = true;
