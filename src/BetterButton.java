@@ -9,7 +9,11 @@ public class BetterButton extends JButton {
     Color color1 = new Color(255, 203, 171);
     Color color2 = new Color(240, 203, 171);
 
+    Color color3 = new Color(170, 215, 81);
+    Color color4 = new Color(162, 209, 73);
+
     Color background;
+    Color backgroundHidden;
 
     public BetterButton(int x, int y){
         super();
@@ -20,16 +24,26 @@ public class BetterButton extends JButton {
         if (x%2 == 0){
             if (y%2 == 0){
                 background = color1;
+                backgroundHidden = color3;
             }else{
                 background = color2;
+                backgroundHidden = color4;
             }
         }else if(x%2 != 0){
             if (y%2 == 0){
                 background = color2;
+                backgroundHidden = color4;
             }else{
                 background = color1;
+                backgroundHidden = color3;
             }
         }
+
+        this.setBackground(backgroundHidden);
+    }
+
+    public void hide(){
+        this.setBackground(backgroundHidden);
     }
 
     public void flag(){

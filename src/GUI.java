@@ -2,12 +2,15 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.Random;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class GUI extends JFrame implements MouseListener, ActionListener {
 
     public int sizeX = 9;
     public int sizeY = 9;
-    public int numBombs = 3;
+    public int numBombs = 9;
     public Cell[][] board = new Cell[sizeY][sizeX];
     public boolean firstMove = true;
     public boolean gameFinished = false;
@@ -85,6 +88,24 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
     }
 
+    public static synchronized void playSound(final String url) {
+        new Thread(new Runnable() {
+            // The wrapper thread is unnecessary, unless it blocks on the
+            // Clip finishing; see comments.
+            public void run() {
+                try {
+                    Clip clip = AudioSystem.getClip();
+                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                            Main.class.getResourceAsStream("sounds/" + url));
+                    clip.open(inputStream);
+                    clip.start();
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+        }).start();
+    }
+
     public void updateBoard(){
         if (gameFinished){
             if (!lost){
@@ -142,7 +163,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
             for (int j = 0; j < sizeX; j++) {
                 buttons[i][j] = new BetterButton(j, i);
                 buttons[i][j].setSize(buttonSize, buttonSize);
-                buttons[i][j].setBackground(Color.green);
+                //buttons[i][j].setBackground(Color.green);
                 buttons[i][j].setMargin(new Insets(1, 1, 1, 1));
                 buttons[i][j].addMouseListener(this);
                 gameArea.add(buttons[i][j]);
@@ -231,10 +252,12 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         if (!(e.getSource() instanceof BetterButton) && !(e.getSource() instanceof JButton)){return;}
         if (SwingUtilities.isRightMouseButton(e)){
             if (e.getSource() != newGame) {
+                playSound("rightClick.wav");
                 ((BetterButton) e.getSource()).flag();
             }
         } else if (SwingUtilities.isLeftMouseButton(e)) {
             if (e.getSource() == newGame) {
+                playSound("newGame.wav");
                 timer.stop();
                 graphicsTimer.stop();
                 gameFinished = false;
@@ -243,7 +266,8 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 //Make all buttons green and clickable again
                 for (int i = 0; i < sizeY; i++) {
                     for (int j = 0; j < sizeX; j++) {
-                        buttons[i][j].setBackground(Color.green);
+                        //buttons[i][j].setBackground(Color.green);
+                        buttons[i][j].hide();
                         buttons[i][j].setEnabled(true);
                         buttons[i][j].setText("");
                         board[i][j] = new Cell();
@@ -253,6 +277,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
             } else {
                 if (((BetterButton) e.getSource()).isEnabled() && !((BetterButton) e.getSource()).flagged) {
+                    playSound("button.wav");
                     int[] userInputs = {((BetterButton) e.getSource()).x, ((BetterButton) e.getSource()).y};
 
                     if (firstMove) {
@@ -276,6 +301,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                             }
                             if (checkForWin()) {
                                 lost = false;
+                                playSound("gameWon.wav");
                                 gameFinished = true;
                                 graphicsTimer.start();
                                 for (int i = 0; i < sizeY; i++) {
@@ -287,6 +313,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                         } else {
                             gameFinished = true;
                             lost = true;
+                            playSound("gameLost.wav");
                             timer.stop();
                             graphicsTimer.start();
 
