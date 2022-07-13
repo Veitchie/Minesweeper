@@ -13,7 +13,8 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public int sizeX = 16;
     public int sizeY = 16;
     public int numBombs = 40;
-    public int livesRemaining = 3;
+    public int maxLives = 3;
+    public int livesRemaining = maxLives;
     public Cell[][] board = new Cell[sizeY][sizeX];
     public boolean firstMove = true;
     public boolean gameFinished = false;
@@ -277,6 +278,8 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         } else if (SwingUtilities.isLeftMouseButton(e)) {
             if (e.getSource() == newGame) {
                 endingPos = 0;
+                livesRemaining = maxLives;
+                lives.setText("Lives: " + String.valueOf(livesRemaining));
                 playSound("newGame.wav");
                 timer.stop();
                 graphicsTimer.stop();
@@ -351,7 +354,14 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                                         buttons[i][j].setEnabled(false);
                                     }
                                 }
-                                Collections.shuffle(bombs);
+                                ArrayList<int[]> temp = new ArrayList<int[]>();
+                                Random rand = new Random();
+                                while(bombs.size() > 0){
+                                    int tempRand = rand.nextInt(bombs.size());
+                                    temp.add(bombs.get(tempRand));
+                                    bombs.remove(tempRand);
+                                }
+                                bombs = temp;
                             }
                         }
                     }
