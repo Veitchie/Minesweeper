@@ -1,6 +1,8 @@
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -8,9 +10,10 @@ import javax.sound.sampled.Clip;
 
 public class GUI extends JFrame implements MouseListener, ActionListener {
 
-    public int sizeX = 9;
-    public int sizeY = 9;
-    public int numBombs = 9;
+    public int sizeX = 16;
+    public int sizeY = 16;
+    public int numBombs = 40;
+    public int livesRemaining = 3;
     public Cell[][] board = new Cell[sizeY][sizeX];
     public boolean firstMove = true;
     public boolean gameFinished = false;
@@ -25,12 +28,16 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public Timer timer;
     public Timer graphicsTimer;
     public JLabel time;
+    public JLabel lives = new JLabel("Lives: " + String.valueOf(livesRemaining));
     public boolean flicker = false;
     public int timePassed = 0;
     public JButton newGame = new JButton("New Game");
     public long startTime;
     public ActionListener timerAction;
     public ActionListener graphicAction;
+
+    private int endingPos = 0;
+    private ArrayList<int[]> bombs = new ArrayList<int[]>();
 
     public Color loseColor = Color.red;
     public Color winColor = Color.green;
@@ -67,6 +74,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         setupButtons();
 
         this.add(newGame);
+        this.add(lives);
 
         time = new JLabel("Time: 0s");
         time.setBackground(Color.RED);
@@ -84,7 +92,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         };
 
         timer = new Timer(1000,timerAction);
-        graphicsTimer = new Timer(500,graphicAction);
+        graphicsTimer = new Timer(250,graphicAction);
 
     }
 
@@ -148,9 +156,19 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 }
                 flicker = !flicker;
             }
+            else{
+                if (endingPos < bombs.size()) {
+                    int x = bombs.get(endingPos)[0];
+                    int y = bombs.get(endingPos)[1];
+                    buttons[y][x].bomb();
+                    playSound("bomb.wav");
+                    endingPos++;
+                }
+            }
         }
 
     }
+
     public void getTime(){
         timePassed++;
         time.setText("Time: " + timePassed + "s");
@@ -252,11 +270,13 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         if (!(e.getSource() instanceof BetterButton) && !(e.getSource() instanceof JButton)){return;}
         if (SwingUtilities.isRightMouseButton(e)){
             if (e.getSource() != newGame) {
-                playSound("rightClick.wav");
-                ((BetterButton) e.getSource()).flag();
+                if (((BetterButton) e.getSource()).flag()){
+                    playSound("rightClick.wav");
+                }
             }
         } else if (SwingUtilities.isLeftMouseButton(e)) {
             if (e.getSource() == newGame) {
+                endingPos = 0;
                 playSound("newGame.wav");
                 timer.stop();
                 graphicsTimer.stop();
@@ -267,7 +287,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 for (int i = 0; i < sizeY; i++) {
                     for (int j = 0; j < sizeX; j++) {
                         //buttons[i][j].setBackground(Color.green);
-                        buttons[i][j].hide();
+                        buttons[i][j].makeHidden();
                         buttons[i][j].setEnabled(true);
                         buttons[i][j].setText("");
                         board[i][j] = new Cell();
@@ -311,19 +331,27 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                                 }
                             }
                         } else {
-                            gameFinished = true;
-                            lost = true;
-                            playSound("gameLost.wav");
-                            timer.stop();
-                            graphicsTimer.start();
+                            livesRemaining--;
+                            lives.setText("Lives: " + String.valueOf(livesRemaining));
+                            buttons[userInputs[1]][userInputs[0]].bomb();
+                            playSound("bomb.wav");
+                            if (livesRemaining < 1) {
+                                gameFinished = true;
+                                lost = true;
+                                playSound("gameLost.wav");
+                                timer.stop();
+                                graphicsTimer.start();
 
-                            for (int i = 0; i < sizeY; i++) {
-                                for (int j = 0; j < sizeX; j++) {
-                                    if (board[i][j].getBomb()) {
-                                        buttons[i][j].bomb();
+                                for (int i = 0; i < sizeY; i++) {
+                                    for (int j = 0; j < sizeX; j++) {
+                                        if (board[i][j].getBomb() && buttons[i][j].isEnabled()) {
+                                            int[] temp = {j,i};
+                                            bombs.add(temp);
+                                        }
+                                        buttons[i][j].setEnabled(false);
                                     }
-                                    buttons[i][j].setEnabled(false);
                                 }
+                                Collections.shuffle(bombs);
                             }
                         }
                     }
@@ -340,6 +368,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         int x = userInputs[0];
         int y = userInputs[1];
 
+        //Check right
         if (x < sizeX - 1) {
             if (board[y][x + 1].getRawValue() == 0 && board[y][x + 1].getHidden()) {
                 board[y][x + 1].setHidden();
@@ -352,7 +381,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 buttons[y][x + 1].setHidden(board[y][x + 1].getValue());
             }
         }
-
+        //Check left
         if (x > 0) {
             if (board[y][x - 1].getRawValue() == 0 && board[y][x - 1].getHidden()) {
                 board[y][x - 1].setHidden();
@@ -365,7 +394,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 buttons[y][x - 1].setHidden(board[y][x - 1].getValue());
             }
         }
-
+        //Check up
         if (y < sizeY - 1) {
             if (board[y + 1][x].getRawValue() == 0 && board[y + 1][x].getHidden()) {
                 board[y + 1][x].setHidden();
@@ -378,7 +407,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 buttons[y + 1][x].setHidden(board[y + 1][x].getValue());
             }
         }
-
+        //Check down
         if (y > 0) {
             if (board[y - 1][x].getRawValue() == 0 && board[y - 1][x].getHidden()) {
                 board[y - 1][x].setHidden();
@@ -389,6 +418,58 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
             } else if (!board[y - 1][x].getBomb() && board[y - 1][x].getHidden()) {
                 board[y - 1][x].setHidden();
                 buttons[y - 1][x].setHidden(board[y - 1][x].getValue());
+            }
+        }
+        //Check top right
+        if (x < sizeX - 1 && y < sizeY - 1) {
+            if (board[y + 1][x + 1].getRawValue() == 0 && board[y + 1][x + 1].getHidden()) {
+                board[y + 1][x + 1].setHidden();
+                buttons[y + 1][x + 1].setHidden();
+                temp[0] = x + 1;
+                temp[1] = y + 1;
+                revealArea(temp);
+            } else if (!board[y + 1][x + 1].getBomb() && board[y + 1][x + 1].getHidden()) {
+                board[y + 1][x + 1].setHidden();
+                buttons[y + 1][x + 1].setHidden(board[y + 1][x + 1].getValue());
+            }
+        }
+        //Check bottom right
+        if (x < sizeX - 1 && y > 0) {
+            if (board[y - 1][x + 1].getRawValue() == 0 && board[y - 1][x + 1].getHidden()) {
+                board[y - 1][x + 1].setHidden();
+                buttons[y - 1][x + 1].setHidden();
+                temp[0] = x + 1;
+                temp[1] = y - 1;
+                revealArea(temp);
+            } else if (!board[y - 1][x + 1].getBomb() && board[y - 1][x + 1].getHidden()) {
+                board[y - 1][x + 1].setHidden();
+                buttons[y - 1][x + 1].setHidden(board[y - 1][x + 1].getValue());
+            }
+        }
+        //Check bottom left
+        if (x > 0 && y > 0) {
+            if (board[y - 1][x - 1].getRawValue() == 0 && board[y - 1][x - 1].getHidden()) {
+                board[y - 1][x - 1].setHidden();
+                buttons[y - 1][x - 1].setHidden();
+                temp[0] = x - 1;
+                temp[1] = y - 1;
+                revealArea(temp);
+            } else if (!board[y - 1][x - 1].getBomb() && board[y - 1][x - 1].getHidden()) {
+                board[y - 1][x - 1].setHidden();
+                buttons[y - 1][x - 1].setHidden(board[y - 1][x - 1].getValue());
+            }
+        }
+        //Check top left
+        if (x > 0 && y < sizeY - 1) {
+            if (board[y + 1][x - 1].getRawValue() == 0 && board[y + 1][x - 1].getHidden()) {
+                board[y + 1][x - 1].setHidden();
+                buttons[y + 1][x - 1].setHidden();
+                temp[0] = x - 1;
+                temp[1] = y + 1;
+                revealArea(temp);
+            } else if (!board[y + 1][x - 1].getBomb() && board[y + 1][x - 1].getHidden()) {
+                board[y + 1][x - 1].setHidden();
+                buttons[y + 1][x - 1].setHidden(board[y + 1][x - 1].getValue());
             }
         }
 

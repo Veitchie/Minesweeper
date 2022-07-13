@@ -42,11 +42,11 @@ public class BetterButton extends JButton {
         this.setBackground(backgroundHidden);
     }
 
-    public void hide(){
+    public void makeHidden(){
         this.setBackground(backgroundHidden);
     }
 
-    public void flag(){
+    public boolean flag(){
         if (this.isEnabled()) {
             if (flagged) {
                 this.setText("");
@@ -54,7 +54,9 @@ public class BetterButton extends JButton {
                 this.setText("■");
             }
             flagged = !flagged;
+            return true;
         }
+        return false;
     }
     public void setHidden(){
         this.setEnabled(false);
