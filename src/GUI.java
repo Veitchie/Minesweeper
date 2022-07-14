@@ -268,6 +268,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     }
 
     public void mouseClicked(MouseEvent e) {
+
         if (!(e.getSource() instanceof BetterButton) && !(e.getSource() instanceof JButton)){return;}
         if (SwingUtilities.isRightMouseButton(e)){
             if (e.getSource() != newGame) {

@@ -121,11 +121,6 @@ public class BetterButton extends JButton {
         }
         return false;
     }
-//    public void setHidden(){
-//        this.setEnabled(false);
-//        this.setBackground(background);
-//        this.hidden = false;
-//    }
 
     public void setHidden(){
         if (bomb){
