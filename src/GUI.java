@@ -98,7 +98,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public synchronized void playSound(final String url) {
         if (audioThread != null) {
             if (audioThread.isAlive()) {
-                audioThread.stop();
+                audioThread.interrupt();
             }
         }
         audioThread = new Thread(new Runnable() {
@@ -121,6 +121,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
             }
         });
         audioThread.start();
+        System.gc();
     }
 
     public static synchronized void playSound2(final String url) {
@@ -295,7 +296,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     }
 
     public void mouseClicked(MouseEvent e) {
-
+        System.gc();
         if (!(e.getSource() instanceof BetterButton) && !(e.getSource() instanceof JButton)){return;}
         if (SwingUtilities.isRightMouseButton(e)){
             if (e.getSource() != newGame) {
