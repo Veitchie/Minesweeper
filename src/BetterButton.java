@@ -43,7 +43,7 @@ public class BetterButton extends JButton {
                 backgroundHidden = color4;
                 bombColor = color6;
             }
-        }else if(x%2 != 0){
+        }else {
             if (y%2 == 0){
                 background = color2;
                 backgroundHidden = color4;
@@ -87,26 +87,6 @@ public class BetterButton extends JButton {
 
     public int getRawValue(){
         return value;
-    }
-
-    public String getValue() {
-        if (hidden) {
-            return "?";
-        } else {
-            if (bomb) {
-                return "*";
-            } else {
-                if (value > 0) {
-                    return String.valueOf(value);
-                }else{
-                    return " ";
-                }
-            }
-        }
-    }
-
-    public void makeHidden(){
-        this.setBackground(backgroundHidden);
     }
 
     public boolean flag(){

@@ -1,29 +1,9 @@
 import java.util.Random;
 import java.util.Scanner;
-import java.util.ArrayList;
 
 public class Main {
 
-    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
-    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
-    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
-    public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
-    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
-    public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
-    public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
-    public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
-
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
-
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         run();
     }
     public static void printBoard(Cell[][] board, int sizeX, int sizeY){
@@ -92,7 +72,6 @@ public class Main {
                     output[1] = limitY - 1 - Integer.parseInt(input[1]);
                     if (output[0] < limitX && output[1] < limitY) {
                         valid = true;
-                        return output;
                     }
                 }catch (Exception e){
                     System.out.println("That wasn't the correct format");
@@ -107,7 +86,6 @@ public class Main {
 
     public static Cell[][] revealArea(Cell[][] board, int sizeX, int sizeY, int[] userInputs){
         int[] temp = {userInputs[0], userInputs[1]};
-        boolean areaCleared = false;
 
 
         int x = userInputs[0];
@@ -117,7 +95,6 @@ public class Main {
             if (board[y][x + 1].getRawValue() == 0 && board[y][x + 1].getHidden()){
                 board[y][x + 1].setHidden();
                 temp[0] = x + 1;
-                temp[1] = y;
                 board = revealArea(board, sizeX, sizeY, temp);
             }else if (!board[y][x + 1].getBomb() && board[y][x + 1].getHidden()){
                 board[y][x + 1].setHidden();
@@ -163,7 +140,7 @@ public class Main {
     public static void run(){
 
         boolean gameFinished = false;
-        int[] userInputs = new int[2];
+        int[] userInputs;
         int sizeX = 30;
         int sizeY = 16;
         int numBombs = 60;

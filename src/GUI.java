@@ -2,7 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -10,9 +11,9 @@ import javax.sound.sampled.Clip;
 
 public class GUI extends JFrame implements MouseListener, ActionListener {
 
-    public int sizeX = 16;
+    public int sizeX = 30;
     public int sizeY = 16;
-    public int numBombs = 40;
+    public int numBombs = 99;
     public int maxLives = 3;
     public int livesRemaining = maxLives;
     public Cell[][] board = new Cell[sizeY][sizeX];
@@ -21,15 +22,15 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public boolean lost = false;
 
     public int buttonSize = 40;
-    public int fontSize = 11;
     public int border = 1;
     public BetterButton[][] buttons;
+    public Thread audioThread;
 
     public JPanel gameArea = new JPanel();
     public Timer timer;
     public Timer graphicsTimer;
     public JLabel time;
-    public JLabel lives = new JLabel("Lives: " + String.valueOf(livesRemaining));
+    public JLabel lives = new JLabel("Lives: " + livesRemaining);
     public boolean flicker = false;
     public int timePassed = 0;
     public JButton newGame = new JButton("New Game");
@@ -38,13 +39,12 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public ActionListener graphicAction;
 
     private int endingPos = 0;
-    private ArrayList<int[]> bombs = new ArrayList<int[]>();
+    private ArrayList<int[]> bombs = new ArrayList<>();
 
-    public Color loseColor = Color.red;
     public Color winColor = Color.green;
     public Color baseColor = Color.gray;
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         gui();
     }
 
@@ -61,8 +61,6 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
         GridLayout gridLayout = new GridLayout(sizeY, sizeX, border, border);
         this.getContentPane().setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
-        GridLayout gridLayout2 = new GridLayout(3, 2, border, border);
-        //this.getContentPane().setLayout(gridLayout2);
 
         gameArea.setLayout(gridLayout);
         this.add(gameArea);
@@ -97,8 +95,13 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
     }
 
-    public static synchronized void playSound(final String url) {
-        new Thread(new Runnable() {
+    public synchronized void playSound(final String url) {
+        if (audioThread != null) {
+            if (audioThread.isAlive()) {
+                audioThread.stop();
+            }
+        }
+        audioThread = new Thread(new Runnable() {
             // The wrapper thread is unnecessary, unless it blocks on the
             // Clip finishing; see comments.
             public void run() {
@@ -108,11 +111,35 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                             Main.class.getResourceAsStream("sounds/" + url));
                     clip.open(inputStream);
                     clip.start();
+                    while(clip.getMicrosecondLength() != clip.getMicrosecondPosition())
+                    {
+                    }
+                    clip.stop();
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
                 }
             }
-        }).start();
+        });
+        audioThread.start();
+    }
+
+    public static synchronized void playSound2(final String url) {
+
+        try {
+            Clip clip = AudioSystem.getClip();
+            AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                    GUI.class.getResourceAsStream("sounds/" + url));
+            clip.open(inputStream);
+            inputStream.close();
+            clip.start();
+            while(clip.getMicrosecondLength() != clip.getMicrosecondPosition())
+            {
+            }
+            clip.stop();
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public void updateBoard(){
@@ -127,7 +154,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                                 }else{
                                     buttons[i][j].setBackground(winColor);
                                 }
-                            }else if(j%2 != 0){
+                            }else {
                                 if (i%2 == 0){
                                     buttons[i][j].setBackground(winColor);
                                 }else{
@@ -145,7 +172,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                                 }else{
                                     buttons[i][j].setBackground(baseColor);
                                 }
-                            }else if(j%2 != 0){
+                            }else {
                                 if (i%2 == 0){
                                     buttons[i][j].setBackground(baseColor);
                                 }else{
@@ -280,7 +307,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
             if (e.getSource() == newGame) {
                 endingPos = 0;
                 livesRemaining = maxLives;
-                lives.setText("Lives: " + String.valueOf(livesRemaining));
+                lives.setText("Lives: " + livesRemaining);
                 playSound("newGame.wav");
                 timer.stop();
                 timePassed = 0;
@@ -333,7 +360,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                             }
                         } else {
                             livesRemaining--;
-                            lives.setText("Lives: " + String.valueOf(livesRemaining));
+                            lives.setText("Lives: " + livesRemaining);
                             buttons[userInputs[1]][userInputs[0]].bomb();
                             playSound("bomb.wav");
                             if (livesRemaining < 1) {
@@ -352,7 +379,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                                         buttons[i][j].setEnabled(false);
                                     }
                                 }
-                                ArrayList<int[]> temp = new ArrayList<int[]>();
+                                ArrayList<int[]> temp = new ArrayList<>();
                                 Random rand = new Random();
                                 while(bombs.size() > 0){
                                     int tempRand = rand.nextInt(bombs.size());
@@ -370,7 +397,6 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
     public void revealArea(int[] userInputs) {
         int[] temp = {userInputs[0], userInputs[1]};
-        boolean areaCleared = false;
 
 
         int x = userInputs[0];
