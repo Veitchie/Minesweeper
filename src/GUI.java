@@ -187,7 +187,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 buttons[i][j].addMouseListener(this);
                 gameArea.add(buttons[i][j]);
 
-                board[i][j] = new Cell();
+                //board[i][j] = new Cell();
             }
         }
     }
@@ -195,7 +195,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public boolean checkForWin(){
         for (int i = 0; i < sizeY; i++) {
             for (int j = 0; j < sizeX; j++) {
-                if (!board[i][j].getBomb() && buttons[i][j].isEnabled()){
+                if (!buttons[i][j].getBomb() && buttons[i][j].isEnabled()){
                     return false;
                 }
             }
@@ -212,8 +212,8 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
             int y = rand.nextInt(sizeY - 1);
 
             if ((x < userInputs[0] - 1 || x > userInputs[0] + 1) && (y < userInputs[1] - 1 || y > userInputs[1] + 1)) {
-                if (!board[y][x].getBomb()) {
-                    board[y][x].setBomb();
+                if (!buttons[y][x].getBomb()) {
+                    buttons[y][x].setBomb();
                 } else {
                     i--;
                 }
@@ -247,13 +247,13 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                             continue;
                         }
 
-                        if (board[y][x].getBomb()) {
+                        if (buttons[y][x].getBomb()) {
                             count++;
                         }
                     }
                 }
 
-                board[i][j].setValue(count);
+                buttons[i][j].setValue(count);
                 count = 0;
 
             }
@@ -282,6 +282,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 lives.setText("Lives: " + String.valueOf(livesRemaining));
                 playSound("newGame.wav");
                 timer.stop();
+                timePassed = 0;
                 graphicsTimer.stop();
                 gameFinished = false;
                 timer = new Timer(1000,timerAction);
@@ -289,11 +290,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 //Make all buttons green and clickable again
                 for (int i = 0; i < sizeY; i++) {
                     for (int j = 0; j < sizeX; j++) {
-                        //buttons[i][j].setBackground(Color.green);
-                        buttons[i][j].makeHidden();
-                        buttons[i][j].setEnabled(true);
-                        buttons[i][j].setText("");
-                        board[i][j] = new Cell();
+                        buttons[i][j].refresh();
                     }
                 }
                 firstMove = true;
@@ -306,21 +303,21 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                     if (firstMove) {
                         timer.start();
                         firstMove = false;
-                        board[userInputs[1]][userInputs[0]].setHidden();
+                        //board[userInputs[1]][userInputs[0]].setHidden();
                         buttons[userInputs[1]][userInputs[0]].setHidden();
 
                         generateGame(userInputs);
                         startTime = System.currentTimeMillis();
                     } else {
                         //Check if bomb
-                        if (!board[userInputs[1]][userInputs[0]].getBomb()) {
-                            board[userInputs[1]][userInputs[0]].setHidden();
-                            int tempValue = board[userInputs[1]][userInputs[0]].getRawValue();
+                        if (!buttons[userInputs[1]][userInputs[0]].getBomb()) {
+                            //board[userInputs[1]][userInputs[0]].setHidden();
+                            int tempValue = buttons[userInputs[1]][userInputs[0]].getRawValue();
                             if (tempValue == 0) {
                                 revealArea(userInputs);
                                 buttons[userInputs[1]][userInputs[0]].setHidden();
                             }else{
-                                buttons[userInputs[1]][userInputs[0]].setHidden(String.valueOf(tempValue));
+                                buttons[userInputs[1]][userInputs[0]].setHidden();
                             }
                             if (checkForWin()) {
                                 lost = false;
@@ -347,7 +344,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
                                 for (int i = 0; i < sizeY; i++) {
                                     for (int j = 0; j < sizeX; j++) {
-                                        if (board[i][j].getBomb() && buttons[i][j].isEnabled()) {
+                                        if (buttons[i][j].getBomb() && buttons[i][j].isEnabled()) {
                                             int[] temp = {j,i};
                                             bombs.add(temp);
                                         }
@@ -370,7 +367,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         }
     }
 
-    public Cell[][] revealArea(int[] userInputs) {
+    public void revealArea(int[] userInputs) {
         int[] temp = {userInputs[0], userInputs[1]};
         boolean areaCleared = false;
 
@@ -380,110 +377,110 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
         //Check right
         if (x < sizeX - 1) {
-            if (board[y][x + 1].getRawValue() == 0 && board[y][x + 1].getHidden()) {
-                board[y][x + 1].setHidden();
+            if (buttons[y][x + 1].getRawValue() == 0 && buttons[y][x + 1].getHidden()) {
+                //board[y][x + 1].setHidden();
                 buttons[y][x + 1].setHidden();
                 temp[0] = x + 1;
                 temp[1] = y;
                 revealArea(temp);
-            } else if (!board[y][x + 1].getBomb() && board[y][x + 1].getHidden()) {
-                board[y][x + 1].setHidden();
-                buttons[y][x + 1].setHidden(board[y][x + 1].getValue());
+            } else if (!buttons[y][x + 1].getBomb() && buttons[y][x + 1].getHidden()) {
+                //board[y][x + 1].setHidden();
+                buttons[y][x + 1].setHidden();
             }
         }
         //Check left
         if (x > 0) {
-            if (board[y][x - 1].getRawValue() == 0 && board[y][x - 1].getHidden()) {
-                board[y][x - 1].setHidden();
+            if (buttons[y][x - 1].getRawValue() == 0 && buttons[y][x - 1].getHidden()) {
+                //board[y][x - 1].setHidden();
                 buttons[y][x - 1].setHidden();
                 temp[0] = x - 1;
                 temp[1] = y;
                 revealArea(temp);
-            } else if (!board[y][x - 1].getBomb() && board[y][x - 1].getHidden()) {
-                board[y][x - 1].setHidden();
-                buttons[y][x - 1].setHidden(board[y][x - 1].getValue());
+            } else if (!buttons[y][x - 1].getBomb() && buttons[y][x - 1].getHidden()) {
+                //board[y][x - 1].setHidden();
+                buttons[y][x - 1].setHidden();
             }
         }
         //Check up
         if (y < sizeY - 1) {
-            if (board[y + 1][x].getRawValue() == 0 && board[y + 1][x].getHidden()) {
-                board[y + 1][x].setHidden();
+            if (buttons[y + 1][x].getRawValue() == 0 && buttons[y + 1][x].getHidden()) {
+                //board[y + 1][x].setHidden();
                 buttons[y + 1][x].setHidden();
                 temp[0] = x;
                 temp[1] = y + 1;
                 revealArea(temp);
-            } else if (!board[y + 1][x].getBomb() && board[y + 1][x].getHidden()) {
-                board[y + 1][x].setHidden();
-                buttons[y + 1][x].setHidden(board[y + 1][x].getValue());
+            } else if (!buttons[y + 1][x].getBomb() && buttons[y + 1][x].getHidden()) {
+                //board[y + 1][x].setHidden();
+                buttons[y + 1][x].setHidden();
             }
         }
         //Check down
         if (y > 0) {
-            if (board[y - 1][x].getRawValue() == 0 && board[y - 1][x].getHidden()) {
-                board[y - 1][x].setHidden();
+            if (buttons[y - 1][x].getRawValue() == 0 && buttons[y - 1][x].getHidden()) {
+                //board[y - 1][x].setHidden();
                 buttons[y - 1][x].setHidden();
                 temp[0] = x;
                 temp[1] = y - 1;
                 revealArea(temp);
-            } else if (!board[y - 1][x].getBomb() && board[y - 1][x].getHidden()) {
-                board[y - 1][x].setHidden();
-                buttons[y - 1][x].setHidden(board[y - 1][x].getValue());
+            } else if (!buttons[y - 1][x].getBomb() && buttons[y - 1][x].getHidden()) {
+                //board[y - 1][x].setHidden();
+                buttons[y - 1][x].setHidden();
             }
         }
         //Check top right
         if (x < sizeX - 1 && y < sizeY - 1) {
-            if (board[y + 1][x + 1].getRawValue() == 0 && board[y + 1][x + 1].getHidden()) {
-                board[y + 1][x + 1].setHidden();
+            if (buttons[y + 1][x + 1].getRawValue() == 0 && buttons[y + 1][x + 1].getHidden()) {
+                //board[y + 1][x + 1].setHidden();
                 buttons[y + 1][x + 1].setHidden();
                 temp[0] = x + 1;
                 temp[1] = y + 1;
                 revealArea(temp);
-            } else if (!board[y + 1][x + 1].getBomb() && board[y + 1][x + 1].getHidden()) {
-                board[y + 1][x + 1].setHidden();
-                buttons[y + 1][x + 1].setHidden(board[y + 1][x + 1].getValue());
+            } else if (!buttons[y + 1][x + 1].getBomb() && buttons[y + 1][x + 1].getHidden()) {
+                //board[y + 1][x + 1].setHidden();
+                buttons[y + 1][x + 1].setHidden();
             }
         }
         //Check bottom right
         if (x < sizeX - 1 && y > 0) {
-            if (board[y - 1][x + 1].getRawValue() == 0 && board[y - 1][x + 1].getHidden()) {
-                board[y - 1][x + 1].setHidden();
+            if (buttons[y - 1][x + 1].getRawValue() == 0 && buttons[y - 1][x + 1].getHidden()) {
+                //board[y - 1][x + 1].setHidden();
                 buttons[y - 1][x + 1].setHidden();
                 temp[0] = x + 1;
                 temp[1] = y - 1;
                 revealArea(temp);
-            } else if (!board[y - 1][x + 1].getBomb() && board[y - 1][x + 1].getHidden()) {
-                board[y - 1][x + 1].setHidden();
-                buttons[y - 1][x + 1].setHidden(board[y - 1][x + 1].getValue());
+            } else if (!buttons[y - 1][x + 1].getBomb() && buttons[y - 1][x + 1].getHidden()) {
+                //board[y - 1][x + 1].setHidden();
+                buttons[y - 1][x + 1].setHidden();
             }
         }
         //Check bottom left
         if (x > 0 && y > 0) {
-            if (board[y - 1][x - 1].getRawValue() == 0 && board[y - 1][x - 1].getHidden()) {
-                board[y - 1][x - 1].setHidden();
+            if (buttons[y - 1][x - 1].getRawValue() == 0 && buttons[y - 1][x - 1].getHidden()) {
+                //board[y - 1][x - 1].setHidden();
                 buttons[y - 1][x - 1].setHidden();
                 temp[0] = x - 1;
                 temp[1] = y - 1;
                 revealArea(temp);
-            } else if (!board[y - 1][x - 1].getBomb() && board[y - 1][x - 1].getHidden()) {
-                board[y - 1][x - 1].setHidden();
-                buttons[y - 1][x - 1].setHidden(board[y - 1][x - 1].getValue());
+            } else if (!buttons[y - 1][x - 1].getBomb() && buttons[y - 1][x - 1].getHidden()) {
+                //board[y - 1][x - 1].setHidden();
+                buttons[y - 1][x - 1].setHidden();
             }
         }
         //Check top left
         if (x > 0 && y < sizeY - 1) {
-            if (board[y + 1][x - 1].getRawValue() == 0 && board[y + 1][x - 1].getHidden()) {
-                board[y + 1][x - 1].setHidden();
+            if (buttons[y + 1][x - 1].getRawValue() == 0 && buttons[y + 1][x - 1].getHidden()) {
+                //board[y + 1][x - 1].setHidden();
                 buttons[y + 1][x - 1].setHidden();
                 temp[0] = x - 1;
                 temp[1] = y + 1;
                 revealArea(temp);
-            } else if (!board[y + 1][x - 1].getBomb() && board[y + 1][x - 1].getHidden()) {
-                board[y + 1][x - 1].setHidden();
-                buttons[y + 1][x - 1].setHidden(board[y + 1][x - 1].getValue());
+            } else if (!buttons[y + 1][x - 1].getBomb() && buttons[y + 1][x - 1].getHidden()) {
+                //board[y + 1][x - 1].setHidden();
+                buttons[y + 1][x - 1].setHidden();
             }
         }
 
-        return board;
+        //return board;
     }
 
     public void printBoard() {

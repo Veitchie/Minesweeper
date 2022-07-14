@@ -6,6 +6,10 @@ public class BetterButton extends JButton {
     public int y;
     public boolean flagged;
 
+    private boolean hidden;
+    private boolean bomb;
+    private int value;
+
     Color color1 = new Color(255, 203, 171);
     Color color2 = new Color(240, 203, 171);
 
@@ -24,6 +28,10 @@ public class BetterButton extends JButton {
         this.x = x;
         this.y = y;
         this.flagged = false;
+
+        this.bomb = false;
+        this.hidden = true;
+        this.value = 0;
 
         if (x%2 == 0){
             if (y%2 == 0){
@@ -50,6 +58,53 @@ public class BetterButton extends JButton {
         this.setBackground(backgroundHidden);
     }
 
+    public void refresh(){
+        this.flagged = false;
+        this.bomb = false;
+        this.hidden = true;
+        this.value = 0;
+
+        this.setBackground(backgroundHidden);
+        this.setText("");
+        this.setEnabled(true);
+    }
+
+    public boolean getHidden(){
+        return hidden;
+    }
+
+    public boolean getBomb(){
+        return bomb;
+    }
+
+    public void setBomb(){
+        this.bomb = true;
+    }
+
+    public void setValue(int value){
+        this.value = value;
+    }
+
+    public int getRawValue(){
+        return value;
+    }
+
+    public String getValue() {
+        if (hidden) {
+            return "?";
+        } else {
+            if (bomb) {
+                return "*";
+            } else {
+                if (value > 0) {
+                    return String.valueOf(value);
+                }else{
+                    return " ";
+                }
+            }
+        }
+    }
+
     public void makeHidden(){
         this.setBackground(backgroundHidden);
     }
@@ -66,22 +121,26 @@ public class BetterButton extends JButton {
         }
         return false;
     }
-    public void setHidden(){
-        this.setEnabled(false);
-        this.setBackground(background);
-    }
+//    public void setHidden(){
+//        this.setEnabled(false);
+//        this.setBackground(background);
+//        this.hidden = false;
+//    }
 
-    public void setHidden(String value){
-        if (value.equals("*")){
+    public void setHidden(){
+        if (bomb){
             this.setEnabled(false);
-            this.setBackground(Color.RED);
-        } else if (value.equals(" ")){
+            this.setBackground(bombColor);
+            this.hidden = false;
+        } else if (value == 0){
             this.setEnabled(false);
             this.setBackground(background);
+            this.hidden = false;
         } else{
-            this.setText(value);
+            this.setText(String.valueOf(value));
             this.setEnabled(false);
             this.setBackground(background);
+            this.hidden = false;
         }
     }
 
