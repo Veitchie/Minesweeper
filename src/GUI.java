@@ -2,18 +2,19 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
+import javax.sound.sampled.LineEvent.Type;
 
 public class GUI extends JFrame implements MouseListener, ActionListener {
 
-    public int sizeX = 30;
+    public int sizeX = 16;
     public int sizeY = 16;
-    public int numBombs = 99;
+    public int numBombs = 32;
     public int maxLives = 3;
     public int livesRemaining = maxLives;
     public Cell[][] board = new Cell[sizeY][sizeX];
@@ -37,6 +38,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public long startTime;
     public ActionListener timerAction;
     public ActionListener graphicAction;
+    public Clip audioClip;
 
     private int endingPos = 0;
     private ArrayList<int[]> bombs = new ArrayList<>();
@@ -57,6 +59,13 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public GUI(String title) {
         super(title);
         frameInit();
+
+        try {
+            audioClip = AudioSystem.getClip();
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
         this.addMouseListener(this);
 
         GridLayout gridLayout = new GridLayout(sizeY, sizeX, border, border);
@@ -108,7 +117,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                 try {
                     Clip clip = AudioSystem.getClip();
                     AudioInputStream inputStream = AudioSystem.getAudioInputStream(
-                            Main.class.getResourceAsStream("sounds/" + url));
+                            GUI.class.getResourceAsStream("sounds/" + url));
                     clip.open(inputStream);
                     clip.start();
                     while(clip.getMicrosecondLength() != clip.getMicrosecondPosition())
@@ -124,10 +133,25 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         System.gc();
     }
 
-    public static synchronized void playSound2(final String url) {
+    public synchronized void playSound2(final String url) {
+        if (audioClip.isActive()){
+            audioClip.close();
+        }
+        try {
+            audioClip.open(AudioSystem.getAudioInputStream(GUI.class.getResourceAsStream("sounds/" + url)));
+            audioClip.start();
+        } catch (Exception e) {
+            System.out.print("Error in playSound: ");
+            System.err.println(e.getMessage());
+        }
+        System.gc();
+    }
+
+    public static synchronized void playSound3(final String url) {
 
         try {
             Clip clip = AudioSystem.getClip();
+            //clip.loop(0);
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(
                     GUI.class.getResourceAsStream("sounds/" + url));
             clip.open(inputStream);
@@ -190,7 +214,8 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                     int x = bombs.get(endingPos)[0];
                     int y = bombs.get(endingPos)[1];
                     buttons[y][x].bomb();
-                    playSound("bomb.wav");
+                    //playSound("bomb.wav");
+                    buttons[y][x].playSound();
                     endingPos++;
                 }
             }
@@ -326,8 +351,9 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
             } else {
                 if (((BetterButton) e.getSource()).isEnabled() && !((BetterButton) e.getSource()).flagged) {
-                    playSound("button.wav");
+                    //playSound("button.wav");
                     int[] userInputs = {((BetterButton) e.getSource()).x, ((BetterButton) e.getSource()).y};
+                    buttons[userInputs[1]][userInputs[0]].playSound();
 
                     if (firstMove) {
                         timer.start();
@@ -363,23 +389,28 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                             livesRemaining--;
                             lives.setText("Lives: " + livesRemaining);
                             buttons[userInputs[1]][userInputs[0]].bomb();
-                            playSound("bomb.wav");
+                            //playSound("bomb.wav");
+                            buttons[userInputs[1]][userInputs[0]].playSound();
                             if (livesRemaining < 1) {
+                                bombs = new ArrayList<>();
                                 gameFinished = true;
                                 lost = true;
                                 playSound("gameLost.wav");
                                 timer.stop();
-                                graphicsTimer.start();
 
                                 for (int i = 0; i < sizeY; i++) {
                                     for (int j = 0; j < sizeX; j++) {
                                         if (buttons[i][j].getBomb() && buttons[i][j].isEnabled()) {
+                                            // && (userInputs[1] != i && userInputs[0] != j)
                                             int[] temp = {j,i};
                                             bombs.add(temp);
+                                        }else{
+                                            buttons[i][j].setEnabled(false);
                                         }
-                                        buttons[i][j].setEnabled(false);
                                     }
                                 }
+
+                                //Randomise bombs
                                 ArrayList<int[]> temp = new ArrayList<>();
                                 Random rand = new Random();
                                 while(bombs.size() > 0){
@@ -388,6 +419,11 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
                                     bombs.remove(tempRand);
                                 }
                                 bombs = temp;
+
+                                //Sort bombs into path
+                                //sortBombs();
+
+                                graphicsTimer.start();
                             }
                         }
                     }

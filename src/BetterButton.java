@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class BetterButton extends JButton {
     public int x;
@@ -9,6 +11,9 @@ public class BetterButton extends JButton {
     private boolean hidden;
     private boolean bomb;
     private int value;
+
+    private Clip clipButton;
+    private Clip clipBomb;
 
     Color color1 = new Color(255, 203, 171);
     Color color2 = new Color(240, 203, 171);
@@ -55,7 +60,28 @@ public class BetterButton extends JButton {
             }
         }
 
+        try {
+            clipButton = AudioSystem.getClip();
+            clipBomb = AudioSystem.getClip();
+
+            clipButton.open(AudioSystem.getAudioInputStream(BetterButton.class.getResourceAsStream("sounds/button.wav")));
+            clipBomb.open(AudioSystem.getAudioInputStream(BetterButton.class.getResourceAsStream("sounds/bomb.wav")));
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
         this.setBackground(backgroundHidden);
+    }
+
+    public void playSound() {
+        String url;
+
+        if (this.bomb){
+            clipBomb.start();
+        } else{
+            clipButton.start();
+        }
+        System.gc();
     }
 
     public void refresh(){
