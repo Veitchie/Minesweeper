@@ -14,7 +14,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
     public int sizeX = 16;
     public int sizeY = 16;
-    public int numBombs = 32;
+    public int numBombs = 40;
     public int maxLives = 3;
     public int livesRemaining = maxLives;
     public Cell[][] board = new Cell[sizeY][sizeX];
@@ -225,7 +225,12 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
     public void getTime(){
         timePassed++;
-        time.setText("Time: " + timePassed + "s");
+        if (timePassed < 60) {
+            time.setText("Time: " + timePassed + "s");
+        }else{
+            int temp = timePassed%60;
+            time.setText("Time: " + (timePassed / 60) + "m " + temp + "s");
+        }
     }
 
     public void setupButtons() {
