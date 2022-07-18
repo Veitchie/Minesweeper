@@ -422,15 +422,18 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         }
         if (SwingUtilities.isRightMouseButton(e)){
             if (e.getSource() != newGame) {
-                if (((BetterButton) e.getSource()).flag()){
-                    playSound("rightClick.wav");
-                    if (((BetterButton) e.getSource()).flagged){
-                        numflags--;
+                if (((BetterButton) e.getSource()).isEnabled()){
+                    if ((!((BetterButton) e.getSource()).flagged && numflags > 0) || (((BetterButton) e.getSource()).flagged)) {
+                        ((BetterButton) e.getSource()).flag();
+                        playSound("rightClick.wav");
+                        if (((BetterButton) e.getSource()).flagged) {
+                            numflags--;
 
-                    }else{
-                        numflags++;
+                        } else {
+                            numflags++;
+                        }
+                        updateFlags();
                     }
-                    updateFlags();
                 }
             }
         } else if (SwingUtilities.isLeftMouseButton(e)) {
