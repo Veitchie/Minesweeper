@@ -15,6 +15,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public int sizeX = 16;
     public int sizeY = 16;
     public int numBombs = 40;
+    public int numflags = 40;
     public int maxLives = 3;
     public int livesRemaining = maxLives;
     public Cell[][] board = new Cell[sizeY][sizeX];
@@ -33,8 +34,9 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public JLabel gifLabel = new JLabel(new ImageIcon(this.getClass().getResource("images/duck.gif")));
     public Timer timer;
     public Timer graphicsTimer;
-    public JLabel time;
-    public JLabel lives = new JLabel("Lives: " + livesRemaining);
+    public JLabel time = new JLabel("Time: ", SwingConstants.CENTER);
+    public JLabel lives = new JLabel("Lives: " + livesRemaining, SwingConstants.CENTER);
+    public JLabel flags = new JLabel("hippos", SwingConstants.CENTER);
     public boolean flicker = false;
     public int timePassed = 0;
     public JButton newGame = new JButton("New Game");
@@ -63,6 +65,11 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         frame.setVisible(true);
     }
 
+    /**
+     Creates a frame with the given title <p>
+     The frame contains three buttons for difficulty
+     @param title The title for the window
+     **/
     public GUI(String title) {
         super(title);
         frameInit();
@@ -91,28 +98,43 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
 
     }
 
+    /**
+     * Called once difficulty has been selected <p>
+     *     Creates and populates a grid of buttons based on the difficulty selected
+     */
     public void setupGame(){
-        //endScreen.setEnabled(false);
+        this.setVisible(false);
+        endScreen.setEnabled(false);
         endScreen.setVisible(false);
 
         GridLayout gridLayout = new GridLayout(sizeY, sizeX, border, border);
-        gameScreen.setLayout(new BoxLayout(this.gameScreen, BoxLayout.Y_AXIS));
+        gameScreen.setLayout(new BoxLayout(this.gameScreen, BoxLayout.PAGE_AXIS));
 
         gameArea.setLayout(gridLayout);
+        gameArea.setAlignmentX(Component.CENTER_ALIGNMENT);
         gameScreen.add(gameArea);
-        this.setSize(((sizeX * buttonSize) + (sizeX * border) + border), ((sizeY * buttonSize) + ((sizeY + 1) * border) + (buttonSize * 2)));
+        this.setSize(((sizeX * buttonSize) + (sizeX * border) + border), ((sizeY * buttonSize) + ((sizeY + 1) * border) + (buttonSize * 3)));
         gameScreen.setBackground(new Color(188, 168, 159));
         gameArea.setBackground(Color.gray);
         newGame.addMouseListener(this);
         newGame.setSize(buttonSize * 2, buttonSize);
         setupButtons();
 
+        newGame.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lives.setAlignmentX(Component.CENTER_ALIGNMENT);
+        time.setAlignmentX(Component.CENTER_ALIGNMENT);
+        flags.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         gameScreen.add(newGame);
         gameScreen.add(lives);
 
-        time = new JLabel("Time: 0s");
+        time.setText("Time: 0s");
         time.setBackground(Color.RED);
         gameScreen.add(time);
+
+        numflags = numBombs;
+        updateFlags();
+        gameScreen.add(flags);
 
         //Add all elements to gameScreen
         this.add(gameScreen);
@@ -132,6 +154,25 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         graphicsTimer = new Timer(250,graphicAction);
 
         this.add(gameScreen);
+        this.setVisible(true);
+    }
+
+    public void updateFlags(){
+
+        String temp = "<html>";
+        if (numflags == 0){
+            flags.setText("-");
+            return;
+        }
+        for (int i = 0; i < numflags; i++){
+            if (i%2 == 0){
+                temp = temp.concat("<font color=rgb(" + BetterButton.color5.getRed() + "," + BetterButton.color5.getGreen() + "," + BetterButton.color5.getBlue() + ")>■</font>");
+            }else {
+                temp = temp.concat("<font color=rgb(" + BetterButton.color6.getRed() + "," + BetterButton.color6.getGreen() + "," + BetterButton.color6.getBlue() + ")>■</font>");
+            }
+        }
+        temp = temp.concat("</html>");
+        flags.setText(temp);
     }
 
     public synchronized void playSound(final String url) {
@@ -197,6 +238,10 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         }
     }
 
+    /**
+     * Called once a game has finished<p>
+     * If the game was won, an animation is played, otherwise it slowly reveals each mine
+     */
     public void updateBoard(){
         if (gameFinished){
             if (!lost){
@@ -379,6 +424,13 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
             if (e.getSource() != newGame) {
                 if (((BetterButton) e.getSource()).flag()){
                     playSound("rightClick.wav");
+                    if (((BetterButton) e.getSource()).flagged){
+                        numflags--;
+
+                    }else{
+                        numflags++;
+                    }
+                    updateFlags();
                 }
             }
         } else if (SwingUtilities.isLeftMouseButton(e)) {

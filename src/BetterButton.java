@@ -15,14 +15,14 @@ public class BetterButton extends JButton {
     private Clip clipButton;
     private Clip clipBomb;
 
-    Color color1 = new Color(255, 203, 171);
-    Color color2 = new Color(240, 203, 171);
+    public static Color color1 = new Color(255, 203, 171);
+    public static Color color2 = new Color(240, 203, 171);
 
-    Color color3 = new Color(170, 215, 81);
-    Color color4 = new Color(162, 209, 73);
+    public static Color color3 = new Color(170, 215, 81);
+    public static Color color4 = new Color(162, 209, 73);
 
-    Color color5 = new Color(227, 23, 23);
-    Color color6 = new Color(237, 24, 24);
+    public static Color color5 = new Color(227, 23, 23);
+    public static Color color6 = new Color(237, 24, 24);
 
     Color background;
     Color backgroundHidden;
