@@ -74,7 +74,6 @@ public class BetterButton extends JButton {
     }
 
     public void playSound() {
-        String url;
 
         if (this.bomb){
             clipBomb.start();

@@ -43,6 +43,10 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public ActionListener graphicAction;
     public Clip audioClip;
 
+    public JButton easy = new JButton("EASY");
+    public JButton medium = new JButton("MEDIUM");
+    public JButton hard = new JButton("HARD");
+
     private int endingPos = 0;
     private ArrayList<int[]> bombs = new ArrayList<>();
 
@@ -70,13 +74,32 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         }
 
         this.addMouseListener(this);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        this.setSize(buttonSize * 2,(buttonSize * 3));
+        endScreen.setLayout(new GridLayout(3, 1, border, border));
+        easy.addMouseListener(this);
+        medium.addMouseListener(this);
+        hard.addMouseListener(this);
+        easy.setBackground(new Color(170, 215, 81));
+        medium.setBackground(new Color(255, 203, 171));
+        hard.setBackground(new Color(227, 23, 23));
+        endScreen.add(easy);
+        endScreen.add(medium);
+        endScreen.add(hard);
+        this.add(endScreen);
+
+    }
+
+    public void setupGame(){
+        //endScreen.setEnabled(false);
+        endScreen.setVisible(false);
 
         GridLayout gridLayout = new GridLayout(sizeY, sizeX, border, border);
         gameScreen.setLayout(new BoxLayout(this.gameScreen, BoxLayout.Y_AXIS));
 
         gameArea.setLayout(gridLayout);
         gameScreen.add(gameArea);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(((sizeX * buttonSize) + (sizeX * border) + border), ((sizeY * buttonSize) + ((sizeY + 1) * border) + (buttonSize * 2)));
         gameScreen.setBackground(new Color(188, 168, 159));
         gameArea.setBackground(Color.gray);
@@ -92,11 +115,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         gameScreen.add(time);
 
         //Add all elements to gameScreen
-        //endScreen.setVisible(false);
         this.add(gameScreen);
-        endScreen.add(gifLabel);
-        endScreen.setOpaque(true);
-        this.add(endScreen);
 
         timerAction = new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
@@ -112,6 +131,7 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         timer = new Timer(1000,timerAction);
         graphicsTimer = new Timer(250,graphicAction);
 
+        this.add(gameScreen);
     }
 
     public synchronized void playSound(final String url) {
@@ -338,6 +358,23 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public void mouseClicked(MouseEvent e) {
         System.gc();
         if (!(e.getSource() instanceof BetterButton) && !(e.getSource() instanceof JButton)){return;}
+        if (e.getSource() == easy){
+            sizeX = 9;
+            sizeY = 9;
+            numBombs = 5;
+            System.out.println("EASY");
+            setupGame();
+        } else if (e.getSource() == medium){
+            sizeX = 16;
+            sizeY = 16;
+            numBombs = 40;
+            setupGame();
+        } else if (e.getSource() == hard) {
+            sizeX = 30;
+            sizeY = 16;
+            numBombs = 99;
+            setupGame();
+        }
         if (SwingUtilities.isRightMouseButton(e)){
             if (e.getSource() != newGame) {
                 if (((BetterButton) e.getSource()).flag()){
