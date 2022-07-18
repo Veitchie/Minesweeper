@@ -28,6 +28,9 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
     public Thread audioThread;
 
     public JPanel gameArea = new JPanel();
+    public JPanel gameScreen = new JPanel();
+    public JPanel endScreen = new JPanel();
+    public JLabel gifLabel = new JLabel(new ImageIcon(this.getClass().getResource("images/duck.gif")));
     public Timer timer;
     public Timer graphicsTimer;
     public JLabel time;
@@ -69,24 +72,31 @@ public class GUI extends JFrame implements MouseListener, ActionListener {
         this.addMouseListener(this);
 
         GridLayout gridLayout = new GridLayout(sizeY, sizeX, border, border);
-        this.getContentPane().setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
+        gameScreen.setLayout(new BoxLayout(this.gameScreen, BoxLayout.Y_AXIS));
 
         gameArea.setLayout(gridLayout);
-        this.add(gameArea);
+        gameScreen.add(gameArea);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(((sizeX * buttonSize) + (sizeX * border) + border), ((sizeY * buttonSize) + ((sizeY + 1) * border) + (buttonSize * 2)));
-        this.setBackground(new Color(188, 168, 159));
+        gameScreen.setBackground(new Color(188, 168, 159));
         gameArea.setBackground(Color.gray);
         newGame.addMouseListener(this);
         newGame.setSize(buttonSize * 2, buttonSize);
         setupButtons();
 
-        this.add(newGame);
-        this.add(lives);
+        gameScreen.add(newGame);
+        gameScreen.add(lives);
 
         time = new JLabel("Time: 0s");
         time.setBackground(Color.RED);
-        this.add(time);
+        gameScreen.add(time);
+
+        //Add all elements to gameScreen
+        //endScreen.setVisible(false);
+        this.add(gameScreen);
+        endScreen.add(gifLabel);
+        endScreen.setOpaque(true);
+        this.add(endScreen);
 
         timerAction = new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
